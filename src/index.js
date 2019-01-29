@@ -63,11 +63,14 @@ class GoodSentry extends Stream.Writable {
       },
     };
 
-    const error = data.error || (data.data && data.data.error);
+    const error = data.error || (data.data && (data.data.error || data.data.err));
     if (error) {
       if (data.data) {
-        Object.assign(additionalData.extra, data.data);
-        delete additionalData.extra.error;
+        Object.keys(data.data).forEach((key) => {
+          if (data.data[key] !== error) {
+            additionalData.extra[key] = data.data[key];
+          }
+        });
       }
       this._client.captureException(error, additionalData, cb());
     }
