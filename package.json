@@ -1,9 +1,9 @@
 {
-  "name": "good-sentry",
-  "version": "2.4.1",
+  "name": "@iantocristian/good-sentry",
+  "version": "2.5.0",
   "repository": {
     "type": "git",
-    "url": "git://github.com/jsynowiec/good-sentry"
+    "url": "git://github.com/jsynowiec/good-sentry.git"
   },
   "description": "Sentry broadcasting for good process monitor",
   "keywords": [
@@ -47,7 +47,11 @@
   },
   "license": "MIT",
   "dependencies": {
-    "hoek": "~5.0.4",
+    "hoek": "^6.1.2",
     "raven": "~2.6.4"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/jsynowiec/good-sentry/issues"
+  },
+  "homepage": "https://github.com/jsynowiec/good-sentry#readme"
 }
