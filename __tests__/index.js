@@ -131,7 +131,7 @@ describe('GoodSentry', () => {
     });
   });
 
-  it('sends each event individually', () => {
+  it('sends error events as exceptions', () => {
     const stream = internals.readStream();
     const reporter = new GoodSentry();
 
