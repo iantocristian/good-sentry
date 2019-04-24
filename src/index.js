@@ -15,7 +15,7 @@ const internals = {
 };
 
 class GoodSentry extends Stream.Writable {
-  constructor({ dsn = null, config = {}, captureUncaught = false } = {}) {
+  constructor({ dsn = null, config = {}, tags = {}, captureUncaught = false } = {}) {
     super({ objectMode: true, decodeStrings: false });
 
     const settings = hoek.applyToDefaults(internals.defaults, config);
@@ -25,6 +25,8 @@ class GoodSentry extends Stream.Writable {
     if (captureUncaught) {
       this._client.install();
     }
+
+    this._tags = tags;
   }
 
   _write(data, encoding, cb) {
@@ -53,6 +55,10 @@ class GoodSentry extends Stream.Writable {
         .filter(
           tag =>
             ['fatal', 'error', 'warning', 'info', 'debug'].indexOf(tag) === -1,
+        )
+        .filter(
+          tag => this._tags.include ? (this._tags.include.indexOf(tag) > -1) :
+            this._tags.exclude ? (this._tags.exclude.indexOf(tag) === -1) : true
         )
         .reduce((acc, curr) => {
           acc[curr] = true;

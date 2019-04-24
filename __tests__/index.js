@@ -191,4 +191,96 @@ describe('GoodSentry', () => {
       });
     });
   });
+
+  it('excludes tags in tags.exclude option if provided', () => {
+    const stream = internals.readStream();
+    const reporter = new GoodSentry({ tags: { exclude: ['tag1', 'tag2'] } });
+
+    stream.pipe(reporter);
+
+    const error = new Error('Mocked error');
+
+    const events = [
+      { data: 'Some message', tags: ['info', 'search', 'tag1', 'tag2'] },
+      { error, tags: ['error', 'application', 'tag2'] }
+    ];
+
+    for (let i = 0; i < events.length; ++i) {
+      // eslint-disable-line no-plusplus
+      stream.push(Object.assign({
+        event: 'log'
+      }, events[i]));
+    }
+
+    stream.push(null);
+
+    return new Promise(resolve => {
+      stream.on('end', () => resolve());
+    }).then(() => {
+
+      expect(client.captureMessage.mock.calls[0][0]).toBe('Some message');
+      expect(client.captureMessage.mock.calls[0][1]).toEqual({
+        level: 'info',
+        extra: {
+          event: 'log',
+        },
+        tags: { search: true },
+      });
+
+      expect(client.captureException.mock.calls[0][0]).toBe(error);
+      expect(client.captureException.mock.calls[0][1]).toEqual({
+        level: 'error',
+        extra: {
+          event: 'log'
+        },
+        tags: { application: true },
+      });
+    });
+  });
+
+  it('excludes tags not in tags.include option if provided', () => {
+    const stream = internals.readStream();
+    const reporter = new GoodSentry({ tags: { include: ['search', 'application'] } });
+
+    stream.pipe(reporter);
+
+    const error = new Error('Mocked error');
+
+    const events = [
+      { data: 'Some message', tags: ['info', 'search', 'tag1', 'tag2'] },
+      { error, tags: ['error', 'application', 'tag2'] }
+    ];
+
+    for (let i = 0; i < events.length; ++i) {
+      // eslint-disable-line no-plusplus
+      stream.push(Object.assign({
+        event: 'log'
+      }, events[i]));
+    }
+
+    stream.push(null);
+
+    return new Promise(resolve => {
+      stream.on('end', () => resolve());
+    }).then(() => {
+
+      expect(client.captureMessage.mock.calls[0][0]).toBe('Some message');
+      expect(client.captureMessage.mock.calls[0][1]).toEqual({
+        level: 'info',
+        extra: {
+          event: 'log',
+        },
+        tags: { search: true },
+      });
+
+      expect(client.captureException.mock.calls[0][0]).toBe(error);
+      expect(client.captureException.mock.calls[0][1]).toEqual({
+        level: 'error',
+        extra: {
+          event: 'log'
+        },
+        tags: { application: true },
+      });
+    });
+  });
 });
